@@ -71,7 +71,7 @@ def create_inputs(
         A list of lists containing prompt components as strings.
     """
 
-    inputs = [[initial_prompt]]
+    inputs = [[f"⫻const:repo_name\n{repo_name}", initial_prompt]]
 
     for file_name in file_names:
         content = read_file_content(file_name)
@@ -89,7 +89,7 @@ def main():
     parser = argparse.ArgumentParser(description='Generate content for a target file based on provided context files.')
     parser.add_argument('--model', type=str, default='gemini-2.0-flash', help='Model name')  # Changed default model
     parser.add_argument('--repo', type=str, default='awesome-ai', help='Repository name')
-    parser.add_argument('--prompt', type=str, required=True, help='Prompt for the model')  # Prompt is now required
+    parser.add_argument('--prompt', type=str, default='', help='Prompt for the model')
     parser.add_argument('files', nargs='+', help='List of files (context files followed by the target file)')
     args = parser.parse_args()
 
