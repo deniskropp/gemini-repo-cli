@@ -1,0 +1,10 @@
+build/
+dist/
+__pycache__/
+gemini_repo_cli.egg-info/
+
+.nx/installation
+.nx/cache
+.nx/workspace-data
+
+.vscode/
