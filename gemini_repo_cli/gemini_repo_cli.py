@@ -57,7 +57,7 @@ def build_prompt(
 
 
 def create_inputs(
-        repo_name: str, file_names: List[str], target_file_name: str, initial_prompt: str
+    repo_name: str, file_names: List[str], target_file_name: str, initial_prompt: str
 ) -> List[List[str]]:
     """Creates input list for the model
 
@@ -71,7 +71,7 @@ def create_inputs(
         A list of lists containing prompt components as strings.
     """
 
-    inputs = [[f"⫻const:repo_name\n{repo_name}", initial_prompt]]
+    inputs = [[initial_prompt, f"⫻const:repo_name\n{repo_name}"]]
 
     for file_name in file_names:
         content = read_file_content(file_name)
@@ -87,9 +87,9 @@ def main():
     Main function to parse arguments, build the prompt, and generate content using the language model.
     """
     parser = argparse.ArgumentParser(description='Generate content for a target file based on provided context files.')
-    parser.add_argument('--model', type=str, default='gemini-2.0-flash', help='Model name')  # Changed default model
+    parser.add_argument('--model', type=str, default='gemini-2.0-flash', help='Model name')
     parser.add_argument('--repo', type=str, default='awesome-ai', help='Repository name')
-    parser.add_argument('--prompt', type=str, default='', help='Prompt for the model')
+    parser.add_argument('--prompt', type=str, action='append', default=[], help='Prompt for the model')
     parser.add_argument('files', nargs='+', help='List of files (context files followed by the target file)')
     args = parser.parse_args()
 
@@ -97,8 +97,20 @@ def main():
     file_names = args.files[:-1]
     target_file_name = args.files[-1]
 
-    prompt = args.prompt
-    print(prompt)
+    prompt = ''
+
+    for p in args.prompt:
+        # Check if the prompt is a file name
+        if os.path.isfile(p):
+            print("Using file content as prompt.")
+            prompt_content = read_file_content(p)
+            if prompt_content:
+                prompt += prompt_content
+        else:
+            print("Using command-line argument as prompt.")
+            prompt += p
+
+    print(f"Prompt:\n{prompt}")
 
     # Build the prompt using the helper function
     #full_prompt = build_prompt(repo_name, file_names, target_file_name, prompt)

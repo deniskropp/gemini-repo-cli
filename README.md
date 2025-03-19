@@ -9,6 +9,8 @@ A command-line tool that leverages the Google Gemini API to generate code or tex
 * **Flexible Input:** Accepts multiple context files and a target file.
 * **Streamed Output:** Displays the generated output in real-time.
 
+See also [Awesome](awesome.md) demo use cases.
+
 ## Prerequisites
 
 * Python 3.8 or higher
