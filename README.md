@@ -1,32 +1,39 @@
 # Gemini Repo CLI
 
-A command-line tool that leverages the Google Gemini API to generate code or text for a target file, using contextual information from other files within a repository.
+A command-line tool to generate content for a target file using the Google Gemini API, leveraging existing repository files as context.
 
-## Key Features
+## Features
 
-* **Context-Aware Generation:** Utilizes relevant context from specified files to generate content.
-* **Customizable Prompts:** Allows tailoring prompts for desired outcomes with clear and specific instructions.
-* **Flexible Input:** Accepts multiple context files and a target file.
-* **Streamed Output:** Displays the generated output in real-time.
+* Generates content based on a given prompt.
+* Uses specified files from a repository as context for content generation.
+* Supports specifying the Gemini model to use.
+* Outputs generated content to the console or a file.
+* Uses structured logging for better debugging and monitoring.
 
-See also [Awesome](awesome.md) demo use cases.
+## Getting Started
 
-## Prerequisites
+### Prerequisites
 
 * Python 3.8 or higher
 * pip (Python package installer)
 * A Google Gemini API Key (from [Google AI Studio](https://makersuite.google.com/app/apikey))
 
-## Installation
+### Installation
 
-1. **Clone the repository:**
+1. **Clone the Repository:**
 
     ```bash
-    git clone https://github.com/deniskropp/gemini-repo-cli.git
+    gh repo clone deniskropp/gemini-repo-cli
     cd gemini-repo-cli
     ```
 
-2. **Install the dependencies and the CLI tool:**
+2. **Install Dependencies:**
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **Install the CLI tool:**
 
     ```bash
     pip install -e .
@@ -34,7 +41,7 @@ See also [Awesome](awesome.md) demo use cases.
 
     *(Run this from the same directory where `setup.py` exists.)*
 
-## Configuration
+### Configuration
 
 1. **Set the Gemini API Key:**
 
@@ -49,57 +56,46 @@ See also [Awesome](awesome.md) demo use cases.
 ## Usage
 
 ```bash
-gemini-repo-cli --model <model_name> --repo <repository_name> --prompt "<your_prompt>" <file1> <file2> ... <target_file>
+gemini-repo-cli <repo_name> <target_file_name> <prompt> [--file_paths <file_path1> <file_path2> ...] [--api_key <api_key>] [--model_name <model_name>] [--output_file <output_file>]
 ```
 
-* `gemini-repo-cli`: The command to execute the tool.
-* `--model <model_name>`: *(Optional)* Specifies the Gemini model to use (e.g., `gemini-2.0-flash`). Defaults to `gemini-2.0-flash`.
-* `--repo <repository_name>`: *(Optional)* Specifies the name of the repository. Defaults to `awesome-ai`.  This is used in the prompt context.
-* `--prompt "<your_prompt>"`: *(Required)* The prompt to guide the Gemini model. Enclose the prompt in double quotes. Be as specific as possible.  Prompt engineering is key - the better the prompt, the better the result.
-* `<file1> <file2> ...`: A list of files to use as context for the model.
-* `<target_file>`: The target file for which you want to generate content. The generated content will be printed to the console.
+### Arguments
 
-**Important:** The order of the files matters. List the context files first, followed by the target file.
+* `<repo_name>`: The name of the repository.
+* `<target_file_name>`: The name of the target file to generate.
+* `<prompt>`: The prompt to guide the content generation.
 
-## Examples
+### Options
 
-1. **Generate a function implementation based on context files:**
+* `--file_paths <file_path1> <file_path2> ...`: A list of file paths to include in the prompt as context (space-separated).
+* `--api_key <api_key>`: The Google Gemini API key. If not provided, it will be read from the `GEMINI_API_KEY` environment variable.
+* `--model_name <model_name>`: The name of the Gemini model to use. Defaults to `gemini-2.0-flash`.
+* `--output_file <output_file>`: The path to the file where the generated content will be written. If not provided, output to stdout.
 
-    ```bash
-    gemini-repo-cli --model gemini-1.5-pro-latest --repo my-project --prompt "Implement a function called 'calculate_average' that calculates the average of a list of numbers." utils.py data_processing.py average_calculator.py
-    ```
+### Examples
 
-    This command uses `utils.py` and `data_processing.py` as context to generate code for the `average_calculator.py` file.
-
-2. **Generate documentation for a class:**
+1. **Generate content and print to stdout:**
 
     ```bash
-    gemini-repo-cli --repo my-library --prompt "Generate docstrings for the 'MyClass' class, including descriptions of the attributes and methods." my_class.py
+    gemini-repo-cli my-project my_new_file.py "Implement a function to calculate the factorial of a number." --file_paths utils.py helper.py
     ```
 
-    This generates docstrings for the `MyClass` class defined in `my_class.py`.
+2. **Generate content and write to a file:**
 
-3. **Redirect Output to a File:**
+    ```bash
+    gemini-repo-cli my-project my_new_file.py "Implement a function to calculate the factorial of a number." --file_paths utils.py helper.py --output_file factorial.py
+    ```
 
-   ```bash
-   gemini-repo-cli --model gemini-1.5-pro-latest --repo my-project --prompt "..." file1.py file2.py target.py > output.txt
-   ```
+3. **Specify the API key and model name:**
 
-   Saves the generated content to `output.txt`.
+    ```bash
+    gemini-repo-cli my-project my_new_file.py "Implement a function to calculate the factorial of a number." --api_key YOUR_API_KEY --model_name gemini-1.5-pro-latest
+    ```
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](docs/contributing.md) for guidelines.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Documentation
-
-For more detailed documentation, please see the [docs](docs/) directory.  It contains:
-
-* [Getting Started](docs/getting_started.md): Installation and configuration.
-* [Usage](docs/usage.md): Detailed usage instructions and examples.
-* [Contributing](docs/contributing.md): Guidelines for contributing to the project.
-* [License](docs/license.md): License information.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
