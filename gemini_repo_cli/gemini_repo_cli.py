@@ -75,15 +75,15 @@ def main():
         return
 
     # Output the generated content
-    if args.output_file:
+    if args.output:
         try:
-            with open(args.output_file, "w") as f:
+            with open(args.output, "w") as f:
                 f.write(generated_content)
-            log_data = {"output_file": args.output, "status": "Content written to file"}
+            log_data = {"output": args.output, "status": "Content written to file"}
             logger.info(json.dumps(log_data))
             print(f"Content written to {args.output}")
         except Exception as e:
-            log_data = {"output_file": args.output, "error": str(e)}
+            log_data = {"output": args.output, "error": str(e)}
             logger.exception(json.dumps(log_data))
             print(f"Error writing to file {args.output}: {e}")
             return
