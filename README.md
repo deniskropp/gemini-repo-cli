@@ -56,7 +56,7 @@ A command-line tool to generate content for a target file using the Google Gemin
 ## Usage
 
 ```bash
-gemini-repo-cli <repo_name> <target_file_name> <prompt> [--file_paths <file_path1> <file_path2> ...] [--api_key <api_key>] [--model_name <model_name>] [--output_file <output_file>]
+gemini-repo-cli <repo_name> <target_file_name> <prompt> [--api_key <api_key>] [--model_name <model_name>] [--output_file <output_file>] [--file_paths <file_path1> <file_path2> ...]
 ```
 
 ### Arguments
@@ -67,10 +67,10 @@ gemini-repo-cli <repo_name> <target_file_name> <prompt> [--file_paths <file_path
 
 ### Options
 
-* `--file_paths <file_path1> <file_path2> ...`: A list of file paths to include in the prompt as context (space-separated).
 * `--api_key <api_key>`: The Google Gemini API key. If not provided, it will be read from the `GEMINI_API_KEY` environment variable.
 * `--model_name <model_name>`: The name of the Gemini model to use. Defaults to `gemini-2.0-flash`.
 * `--output_file <output_file>`: The path to the file where the generated content will be written. If not provided, output to stdout.
+* `--file_paths <file_path1> <file_path2> ...`: A list of file paths to include in the prompt as context (space-separated).
 
 ### Examples
 
