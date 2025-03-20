@@ -14,8 +14,12 @@ def main():
     """
     Main function to parse command-line arguments and generate content using the GeminiRepoAPI.
     """
+    # Extract the last two directories from the current working directory
+    current_dir = os.path.normpath(os.getcwd())
+    repo_name = "/".join(current_dir.split(os.sep)[-2:])
+
     parser = argparse.ArgumentParser(description="Generate content for a target file using Google Gemini API.")
-    parser.add_argument("repo_name", help="The name of the repository.", default=os.dirname(os.curdir))
+    parser.add_argument("repo_name", help="The name of the repository.", default=repo_name)
     parser.add_argument("target_file_name", help="The name of the target file to generate.", default='solution.md')
     parser.add_argument("prompt", help="The prompt to guide the content generation.", default='')
     parser.add_argument(
@@ -38,7 +42,7 @@ def main():
     )
 
     args = parser.parse_args()
-    
+
     if args.debug:
         logger.setLevel(logger.DEBUG)
 
