@@ -28,6 +28,9 @@ def main():
         "--api_key", help="The Google Gemini API key. If not provided, it will be read from the GEMINI_API_KEY environment variable."
     )
     parser.add_argument(
+        "--debug", help="Set logging level to DEBUG."
+    )
+    parser.add_argument(
         "--model_name", default="gemini-2.0-flash", help="The name of the Gemini model to use. Defaults to 'gemini-2.0-flash'."
     )
     parser.add_argument(
@@ -35,6 +38,9 @@ def main():
     )
 
     args = parser.parse_args()
+    
+    if args.debug:
+        logger.setLevel(logger.DEBUG)
 
     # Initialize the API
     try:
