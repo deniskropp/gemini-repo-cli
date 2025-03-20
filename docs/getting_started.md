@@ -13,14 +13,14 @@ This guide will walk you through the installation and configuration of the Gemin
 1. **Clone the Repository (if you haven't already):**
 
    ```bash
-   git clone <your_repository_url>  # Replace with your actual repository URL
-   cd <your_repository_directory>   # Replace with your actual repository directory
+   gh repo clone deniskropp/gemini-repo-cli
+   cd gemini-repo-cli
    ```
 
 2. **Install Dependencies:**
 
    ```bash
-   pip install google-generative-ai
+   pip install -r requirements.txt
    ```
 
 3. **Install the CLI tool:**

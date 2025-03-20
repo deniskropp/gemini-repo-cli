@@ -3,7 +3,7 @@ import os
 import logging
 import json
 
-from gemini_repo.gemini_repo_api import GeminiRepoAPI
+from gemini_repo import GeminiRepoAPI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -15,9 +15,9 @@ def main():
     Main function to parse command-line arguments and generate content using the GeminiRepoAPI.
     """
     parser = argparse.ArgumentParser(description="Generate content for a target file using Google Gemini API.")
-    parser.add_argument("repo_name", help="The name of the repository.")
-    parser.add_argument("target_file_name", help="The name of the target file to generate.")
-    parser.add_argument("prompt", help="The prompt to guide the content generation.")
+    parser.add_argument("repo_name", help="The name of the repository.", default=os.dirname(os.curdir))
+    parser.add_argument("target_file_name", help="The name of the target file to generate.", default='solution.md')
+    parser.add_argument("prompt", help="The prompt to guide the content generation.", default='')
     parser.add_argument(
         "--file_paths",
         nargs="+",
