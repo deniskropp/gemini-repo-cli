@@ -1,13 +1,29 @@
-build/
-dist/
+# Python cache files
 __pycache__/
-gemini_repo_cli.egg-info/
+*.py[cod]
+*.class
 
-.nx/installation
-.nx/cache
-.nx/workspace-data
+# Virtual environment
+venv/
+.venv/
+env/
+.env
 
+# IDE folders
+.idea/
 .vscode/
 
-.pytest.cache/
-.nx/
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Secrets / API Keys (if accidentally committed)
+*.log
+*.envrc
+*.key
+*.pem
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

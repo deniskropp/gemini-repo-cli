@@ -6,11 +6,11 @@ setup(
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
-        'google-generativeai',
+        'google-genai>=1.9.0',
     ],
     entry_points={
         'console_scripts': [
-            'gemini-repo-cli=gemini_repo_cli.gemini_repo_cli:main',
+            'gemini-repo-cli=gemini_repo.cli:main',
         ],
     },
     author='Denis Kropp',
@@ -21,7 +21,6 @@ setup(
     url='https://github.com/deniskropp/gemini-repo-cli',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Code Generators',
