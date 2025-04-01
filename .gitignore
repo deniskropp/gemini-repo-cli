@@ -8,3 +8,6 @@ gemini_repo_cli.egg-info/
 .nx/workspace-data
 
 .vscode/
+
+.pytest.cache/
+.nx/

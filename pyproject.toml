@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gemini-repo-cli"
+version = "0.2.0"
+authors = [
+  { name = "Denis Kropp", email = "dok@directfb1.org" },
+]
+description = "Repo-level tool using Gemini"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "google-generativeai",
+]
+keywords = ["gemini","ai","code generation","repository"]
+
+[project.urls]
+"Homepage" = "https://github.com/deniskropp/gemini-repo-cli"
+"Bug Reports" = "https://github.com/deniskropp/gemini-repo-cli/issues"
+"Source" = "https://github.com/deniskropp/gemini-repo-cli"
+
+[project.scripts]
+gemini-repo-cli = "gemini_repo_cli.gemini_repo_cli:main"
+
+[tool.setuptools]
+packages = ["gemini_repo_cli"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
