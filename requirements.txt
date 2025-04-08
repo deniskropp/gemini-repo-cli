@@ -1,1 +1,1 @@
-google-genai>=1.9.0 # Specify a suitable version range
+google-genai<1.9.0 # Specify a suitable version range

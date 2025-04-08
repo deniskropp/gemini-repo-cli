@@ -103,23 +103,28 @@ class GeminiRepoAPI:
             log_data = {"event": "prompt_created", "num_input_parts": len(model_inputs)}
             logger.debug(log_data)
 
+            with open('prompt.txt', mode='w') as f:
+                f.write("\n\n\n".join(model_inputs))
+
             # Select the specific model instance
-            model_instance = self.client.get_generative_model(self.model_name)
+            #model_instance = [self.model_name]
 
             # Generate content using the streaming API for potentially long responses
-            response_stream = model_instance.generate_content(
+            #response_stream = model_instance.generate_content(
+            #    contents=model_inputs,
+            #    generation_config=self.generation_config,
+            #    stream=True
+            #)
+            response = self.client.models.generate_content(
+                model=self.model_name,
                 contents=model_inputs,
-                generation_config=self.generation_config,
-                stream=True
+                config=self.generation_config
             )
             log_data = {"event": "generation_request_sent", "model": self.model_name}
             logger.info(log_data)
 
             generated_content_parts = []
-            for chunk in response_stream:
-                # Handle potential empty chunks or chunks without text
-                if chunk.parts:
-                    generated_content_parts.append(chunk.text)
+            generated_content_parts.append(response.text)
 
 
             generated_content = "".join(generated_content_parts)
