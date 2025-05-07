@@ -5,17 +5,18 @@ import logging
 import json
 import time
 from logging import StreamHandler, Formatter
-from gemini_repo import GeminiRepoAPI
 
-
-# --- Constants ---
-
-# Use default from API class
-from gemini_repo.api import DEFAULT_MODEL
+# Import necessary classes and constants from the updated __init__
+from gemini_repo import (
+    GeminiRepoAPI,
+    OllamaRepoAPI,
+    DEFAULT_GEMINI_MODEL,
+    DEFAULT_OLLAMA_MODEL,
+)
 
 
 # --- JSON Logging Setup ---
-
+# ... (JsonFormatter and setup_logging function remain the same) ...
 class JsonFormatter(Formatter):
     """
     Formats log records as JSON strings (JSONL format - one JSON object per line).
@@ -50,8 +51,8 @@ def setup_logging(debug=False):
     logger.setLevel(log_level)
 
     # Remove existing handlers to avoid duplicates if run multiple times
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
+    if logger.hasHandlers():
+        logger.handlers.clear()
 
     # Create handler and formatter
     handler = StreamHandler(sys.stderr) # Log to stderr
@@ -63,26 +64,36 @@ def setup_logging(debug=False):
 
     # Set level for the specific logger of this module
     logging.getLogger(__name__).setLevel(log_level)
-    # Optionally set levels for other libraries if needed (e.g., reduce verbosity)
-    # logging.getLogger('google').setLevel(logging.WARNING)
+    logging.getLogger("gemini_repo").setLevel(log_level) # Set level for the whole package logger
+    # Optionally set levels for other libraries if needed
+    logging.getLogger('google').setLevel(logging.WARNING)
+    logging.getLogger('urllib3').setLevel(logging.WARNING) # Common dependency for network requests
+    logging.getLogger('ollama').setLevel(logging.INFO if debug else logging.WARNING) # Ollama lib logging
 
 
 # --- Main CLI Logic ---
 
 def main():
     """
-    Command-Line Interface for generating file content using GeminiRepoAPI.
-
-    Parses arguments, sets up logging, initializes the API, calls the
-    content generation method, and handles output to stdout or a file.
+    Command-Line Interface for generating file content using different LLM providers.
     """
     parser = argparse.ArgumentParser(
-        description="Generate content for a target file using Google Gemini API and repository context.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter # Show default values in help
+        description="Generate file content using Gemini or Ollama API and repository context.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+
+    # --- Provider Selection ---
+    parser.add_argument(
+        "--provider", "-p",
+        choices=["gemini", "ollama"],
+        default="gemini", # Default to Gemini
+        help="The LLM provider to use."
+    )
+
+    # --- Common Arguments ---
     parser.add_argument(
         "repo_name",
-        help="The logical name of the repository (used for context in the prompt)."
+        help="The logical name of the repository (used for context)."
     )
     parser.add_argument(
         "target_file",
@@ -100,17 +111,6 @@ def main():
         help="Space-separated list of file paths to include as context.",
     )
     parser.add_argument(
-        "--api-key", "-k", # Changed short flag to avoid conflict if adding key file option later
-        dest="api_key", # Explicit destination name
-        default=None, # Default to None, API class will check env var
-        help="Google Gemini API key. Overrides GEMINI_API_KEY environment variable if provided."
-    )
-    parser.add_argument(
-        "--model", "-m",
-        default=DEFAULT_MODEL,
-        help="Name of the Gemini model to use."
-    )
-    parser.add_argument(
         "--output", "-o",
         metavar="OUTPUT_FILE",
         help="Path to the file where generated content will be written. If omitted, output to stdout."
@@ -121,74 +121,129 @@ def main():
         help="Enable DEBUG level logging."
     )
 
+    # --- Provider-Specific Arguments ---
+    # Gemini
+    gemini_group = parser.add_argument_group('Gemini Options (used if --provider=gemini)')
+    gemini_group.add_argument(
+        "--gemini-api-key",
+        dest="gemini_api_key",
+        default=None, # API class checks env var GEMINI_API_KEY
+        help="Google Gemini API key. Overrides GEMINI_API_KEY environment variable."
+    )
+    gemini_group.add_argument(
+        "--gemini-model",
+        dest="gemini_model",
+        default=DEFAULT_GEMINI_MODEL,
+        help="Name of the Gemini model to use."
+    )
+
+    # Ollama
+    ollama_group = parser.add_argument_group('Ollama Options (used if --provider=ollama)')
+    ollama_group.add_argument(
+        "--ollama-model",
+        dest="ollama_model",
+        default=DEFAULT_OLLAMA_MODEL,
+        help="Name of the Ollama model to use."
+    )
+    ollama_group.add_argument(
+        "--ollama-host",
+        dest="ollama_host",
+        default=None, # API class checks env var OLLAMA_HOST
+        help="Ollama host URL (e.g., http://localhost:11434). Overrides OLLAMA_HOST environment variable."
+    )
+
     args = parser.parse_args()
 
     # --- Setup Logging ---
     setup_logging(debug=args.debug)
-    logger = logging.getLogger(__name__) # Get logger for this module
+    logger = logging.getLogger(__name__)
     start_time = time.time()
-    logger.info({"event": "cli_start", "args": vars(args)}) # Log arguments securely if needed
+    # Log selected args, masking sensitive ones if necessary in a real app
+    log_args = vars(args).copy()
+    if 'gemini_api_key' in log_args and log_args['gemini_api_key']:
+        log_args['gemini_api_key'] = '***REDACTED***'
+    logger.info({"event": "cli_start", "args": log_args})
 
-    # --- Initialize API ---
-    api_instance = None # Initialize to None
+    # --- Initialize API based on provider ---
+    api_instance = None
     try:
-        api_instance = GeminiRepoAPI(api_key=args.api_key, model_name=args.model)
-        logger.info({"event": "api_init", "status": "success"})
-    except ValueError as e:
-        logger.error({"event": "api_init", "status": "failed", "error": str(e)})
+        if args.provider == "gemini":
+            logger.info({"event": "api_init_start", "provider": "gemini"})
+            api_instance = GeminiRepoAPI(
+                api_key=args.gemini_api_key,
+                model_name=args.gemini_model
+            )
+        elif args.provider == "ollama":
+            logger.info({"event": "api_init_start", "provider": "ollama"})
+            api_instance = OllamaRepoAPI(
+                model_name=args.ollama_model,
+                host=args.ollama_host
+            )
+        else:
+            # This case should not be reachable due to argparse choices
+            raise ValueError(f"Unsupported provider: {args.provider}")
+        logger.info({"event": "api_init", "status": "success", "provider": args.provider})
+
+    except ValueError as e: # Catches initialization errors like missing API keys/hosts
+        logger.error({"event": "api_init", "status": "failed", "provider": args.provider, "error": str(e)})
         print(f"ERROR: Initialization failed: {e}", file=sys.stderr)
-        sys.exit(1) # Exit with error code
-    except Exception as e:
-        logger.exception({"event": "api_init", "status": "failed", "error": str(e)})
+        sys.exit(1)
+    except Exception as e: # Catch unexpected errors during init
+        logger.exception({"event": "api_init", "status": "failed", "provider": args.provider, "error": str(e)})
         print(f"ERROR: Unexpected error during initialization: {e}", file=sys.stderr)
         sys.exit(1)
 
     # --- Generate Content ---
     generated_content = None
     try:
-        logger.info({"event": "generation_start", "target_file": args.target_file, "context_files": args.files})
+        logger.info({
+            "event": "generation_start",
+            "provider": args.provider,
+            "model": api_instance.model_name, # Log the actual model used
+            "target_file": args.target_file,
+            "context_files": args.files
+        })
         generation_start_time = time.time()
 
+        # Call the common generate_content method
         generated_content = api_instance.generate_content(
             repo_name=args.repo_name,
             file_paths=args.files,
             target_file_name=args.target_file,
             prompt=args.prompt,
         )
-
         generation_duration = time.time() - generation_start_time
         logger.info({
             "event": "generation_end",
             "status": "success",
+            "provider": args.provider,
             "duration_seconds": round(generation_duration, 3),
             "output_length": len(generated_content)
         })
 
     except FileNotFoundError as e:
-         # Specific handling for file not found during generation (logged in API, but good to note here too)
-        logger.error({"event": "generation_end", "status": "failed", "reason": "context_file_not_found", "error": str(e)})
+        logger.error({"event": "generation_end", "status": "failed", "reason": "context_file_not_found", "provider": args.provider, "error": str(e)})
         print(f"ERROR: Could not read context file: {e}", file=sys.stderr)
         sys.exit(1)
-    except Exception as e:
-        logger.exception({"event": "generation_end", "status": "failed", "reason": "api_error", "error": str(e)})
+    except Exception as e: # Catch API errors or other issues during generation
+        logger.exception({"event": "generation_end", "status": "failed", "reason": "api_error", "provider": args.provider, "error": str(e)})
         print(f"ERROR: Failed to generate content: {e}", file=sys.stderr)
+        # Consider more specific error handling for different API exceptions if needed
         sys.exit(1)
 
     # --- Output Content ---
     output_destination = args.output if args.output else "stdout"
     try:
         if args.output:
-            # Create directories if they don't exist
             output_dir = os.path.dirname(args.output)
-            if output_dir: # Ensure it's not an empty string (e.g., file in current dir)
+            if output_dir:
                  os.makedirs(output_dir, exist_ok=True)
 
             with open(args.output, "w", encoding='utf-8') as f:
                 f.write(generated_content)
             logger.info({"event": "output_write", "status": "success", "destination": args.output})
-            print(f"Content successfully written to {args.output}", file=sys.stderr) # User feedback to stderr
+            print(f"Content successfully written to {args.output}", file=sys.stderr)
         else:
-            # Print generated content directly to standard output
             print(generated_content)
             logger.info({"event": "output_write", "status": "success", "destination": "stdout"})
 
