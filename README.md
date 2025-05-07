@@ -6,7 +6,7 @@ A command-line tool to generate content for a target file using Large Language M
 
 * **Ollama Support!** You can now use local Ollama models for content generation. This allows for offline usage and greater control over your LLM.
 * **Improved Logging:** Structured JSON logging provides better debugging and monitoring capabilities.
-* **More Gemini Models:**  You can now specify different Gemini models, including the latest `gemini-1.5-pro-latest`.
+* **More Gemini Models:**  You can now specify different Gemini models, including the latest `gemini-2.0-flash`.
 * **Simplified Installation:** The installation process has been streamlined for easier setup.
 
 ## Features
