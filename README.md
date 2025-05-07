@@ -2,6 +2,8 @@
 
 A command-line tool to generate content for a target file using Large Language Models (LLMs), leveraging existing repository files as context.  Currently supports Google Gemini and local Ollama models.
 
+Don't miss the [showcase](awesome-repo-cli.md)!
+
 ## 🎉 What's New! 🎉
 
 * **Ollama Support!** You can now use local Ollama models for content generation. This allows for offline usage and greater control over your LLM.
