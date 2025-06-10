@@ -109,6 +109,17 @@ class BaseRepoAPI(ABC):
         # 1. Initial User Prompt
         prompt_parts.append(f"--- User Task ---\n{initial_prompt}\n")
 
+        # 1a. Explicit repo-level instruction
+        prompt_parts.append(
+            "--- Repo-Level Instruction ---\n"
+            "You are provided with context from multiple files in the repository. "
+            "Analyze the repository as a whole, considering relationships between files, "
+            "overall architecture, and cross-file dependencies. "
+            "When generating the target file, ensure it integrates correctly with the rest of the repository. "
+            "If relevant, reference or utilize patterns, classes, or functions defined in other files. "
+            "Do not simply summarize individual files; reason at the repository level.\n"
+        )
+
         # 2. Repository Context
         prompt_parts.append(f"--- Repository Context ---\nRepository Name: {repo_name}\n")
 
@@ -135,12 +146,12 @@ class BaseRepoAPI(ABC):
         full_prompt = "\n".join(prompt_parts)
 
         # Save prompt for debugging if needed (consider making this optional)
-        # try:
-        #     with open('prompt_debug.txt', mode='w', encoding='utf-8') as f:
-        #          f.write(full_prompt)
-        #     logger.debug({"event": "prompt_saved_to_file", "file": "prompt_debug.txt"})
-        # except Exception as e:
-        #     logger.warning({"event": "prompt_save_failed", "error": str(e)})
+        try:
+            with open('gemini-repo-cli_generated_prompt.txt', mode='w', encoding='utf-8') as f:
+                f.write(full_prompt)
+            logger.debug({"event": "prompt_saved_to_file", "file": "prompt_debug.txt"})
+        except Exception as e:
+            logger.warning({"event": "prompt_save_failed", "error": str(e)})
 
 
         log_data = {"event": "prompt_build_complete", "target_file_name": target_file_name, "prompt_length": len(full_prompt)}
